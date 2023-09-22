@@ -4,16 +4,16 @@ const Button = ({ name, handleClick }) => {
   return <button onClick={handleClick}>{name}</button>;
 };
 
-const Stats = ({ good, neutral, bad }) => {
-  const total = good + neutral + bad;
-  const average = (good * 1 + neutral * 0 + bad * -1) / total;
-  const positive = (good / total) * 100;
+const Stats = (props) => {
+  const total = props.good + props.neutral + props.bad;
+  const average = (props.good * 1 + props.neutral * 0 + props.bad * -1) / total;
+  const positive = (props.good / total) * 100;
 
   return (
     <div>
-      <p>Good: {good}</p>
-      <p>Neutral: {neutral}</p>
-      <p>Bad: {bad}</p>
+      <p>Good: {props.good}</p>
+      <p>Neutral: {props.neutral}</p>
+      <p>Bad: {props.bad}</p>
       <p>All: {total}</p>
       <p>Average: {average}</p>
       <p>Positive: {positive} %</p>
