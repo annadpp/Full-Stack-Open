@@ -30,12 +30,43 @@ const App = () => {
     setVotes(copy);
   };
 
+  const Anecdote = (props) => {
+    return (
+      <div>
+        <h2>Anecdote of the day</h2>
+        <p>{props.anecdote}</p>
+        <p>has {props.votes} votes</p>
+        <button onClick={nextAnecdote}>next anecdote</button>
+        <button onClick={handleVotes}>vote</button>
+      </div>
+    );
+  };
+
+  const MaxVotesAnecdote = () => {
+    const maxVotes = Math.max(...votes);
+    const iMaxVotes = votes.indexOf(maxVotes);
+
+    return (
+      <>
+        {maxVotes > 0 && (
+          <div>
+            <h2>Anecdote with most votes</h2>
+            <p>{anecdotes[iMaxVotes]}</p>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div>
-      <p>{anecdotes[selected]}</p>
-      <p>has {votes[selected]} votes</p>
-      <button onClick={nextAnecdote}>next anecdote</button>
-      <button onClick={handleVotes}>vote</button>
+      <Anecdote
+        anecdote={anecdotes[selected]}
+        votes={votes[selected]}
+        nextAnecdote={nextAnecdote}
+        handleVotes={handleVotes}
+      />
+      <MaxVotesAnecdote anecdotes={anecdotes} votes={votes} />
     </div>
   );
 };
