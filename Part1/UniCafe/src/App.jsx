@@ -10,14 +10,20 @@ const Stats = (props) => {
   const positive = (props.good / total) * 100;
 
   return (
-    <div>
-      <p>Good: {props.good}</p>
-      <p>Neutral: {props.neutral}</p>
-      <p>Bad: {props.bad}</p>
-      <p>All: {total}</p>
-      <p>Average: {average}</p>
-      <p>Positive: {positive} %</p>
-    </div>
+    <>
+      {total === 0 ? (
+        <p>No feedback given</p>
+      ) : (
+        <div>
+          <p>Good: {props.good}</p>
+          <p>Neutral: {props.neutral}</p>
+          <p>Bad: {props.bad}</p>
+          <p>All: {total}</p>
+          <p>Average: {average}</p>
+          <p>Positive: {positive} %</p>
+        </div>
+      )}
+    </>
   );
 };
 
