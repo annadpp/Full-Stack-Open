@@ -1,4 +1,4 @@
-const Header = ({ courseName }) => <h1>{courseName}</h1>;
+const Header = ({ courseName }) => <h2>{courseName}</h2>;
 
 const Total = ({ sum }) => (
   <p>
@@ -25,6 +25,7 @@ const Course = ({ course }) => {
 
   return (
     <div>
+      <h1>Web development curriculum</h1>
       <Header courseName={course.name} />
       <Content parts={course.parts} />
       <Total sum={total} />
