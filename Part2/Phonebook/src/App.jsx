@@ -1,4 +1,42 @@
-import { useState } from "react";
+import React, { useState } from "react";
+
+const Filter = (props) => {
+  return (
+    <p>
+      filter shown with <input value={props.filter} onChange={props.onChange} />
+    </p>
+  );
+};
+
+const PersonForm = (props) => {
+  return (
+    <form onSubmit={props.addPerson}>
+      <div>
+        name: <input value={props.newName} onChange={props.handleNameChange} />
+      </div>
+      <div>
+        number:{" "}
+        <input value={props.newPhone} onChange={props.handlePhoneChange} />
+      </div>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  );
+};
+
+const Persons = (props) => {
+  return (
+    <div>
+      <h2>Numbers</h2>
+      {props.persons.map((person) => (
+        <p key={person.id}>
+          {person.name} {person.phone}
+        </p>
+      ))}
+    </div>
+  );
+};
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -10,7 +48,6 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [filter, setFilter] = useState("");
-  const [personsShowed, setPersonsShowed] = useState(persons); // Initialize with persons
 
   const handleNameChange = (e) => {
     setNewName(e.target.value);
@@ -30,10 +67,6 @@ const App = () => {
             ...persons,
             { name: newName, phone: newPhone, id: persons.length + 1 },
           ]);
-          setPersonsShowed([
-            ...personsShowed, // Add the new person to personsShowed
-            { name: newName, phone: newPhone, id: persons.length + 1 },
-          ]);
         })()
       : alert(`${newName} is already added to phonebook`);
     setNewName("");
@@ -43,35 +76,29 @@ const App = () => {
   const filterNames = (e) => {
     const nameFilter = e.target.value.toLowerCase();
     setFilter(nameFilter);
-    setPersonsShowed(
-      persons.filter((person) => person.name.toLowerCase().includes(nameFilter))
-    );
   };
+
+  const personsToShow = filter
+    ? persons.filter((person) => person.name.toLowerCase().includes(filter))
+    : persons;
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <p>
-        filter shown with <input value={filter} onChange={filterNames} />
-      </p>
-      <h3>add a new</h3>
-      <form onSubmit={addPerson}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          number: <input value={newPhone} onChange={handlePhoneChange} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      {personsShowed.map((person) => (
-        <p key={person.id}>
-          {person.name} {person.phone}
-        </p>
-      ))}
+
+      <Filter filter={filter} onChange={filterNames} />
+
+      <h3>Add a new</h3>
+
+      <PersonForm
+        newName={newName}
+        newPhone={newPhone}
+        handleNameChange={handleNameChange}
+        handlePhoneChange={handlePhoneChange}
+        addPerson={addPerson}
+      />
+
+      <Persons persons={personsToShow} />
     </div>
   );
 };
