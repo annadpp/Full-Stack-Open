@@ -27,12 +27,27 @@ const PersonForm = (props) => {
 };
 
 const Persons = (props) => {
+  const handleDelete = (id, name) => {
+    const confirmDeletion = window.confirm(`Delete ${name}?`);
+
+    if (confirmDeletion) {
+      personsService.remove(id).then(() => {
+        props.setPersons((previousPersons) =>
+          previousPersons.filter((person) => person.id !== id)
+        );
+      });
+    }
+  };
+
   return (
     <div>
       <h2>Numbers</h2>
       {props.persons.map((person) => (
         <p key={person.id}>
           {person.name} {person.phone}
+          <button onClick={() => handleDelete(person.id, person.name)}>
+            Delete
+          </button>
         </p>
       ))}
     </div>
@@ -101,7 +116,7 @@ const App = () => {
         addPerson={addPerson}
       />
 
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} setPersons={setPersons} />
     </div>
   );
 };
