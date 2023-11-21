@@ -28,9 +28,9 @@ const PersonForm = (props) => {
 
 const Persons = (props) => {
   const handleDelete = (id, name) => {
-    const confirmDeletion = window.confirm(`Delete ${name}?`);
+    const confirmDelete = window.confirm(`Delete ${name}?`);
 
-    if (confirmDeletion) {
+    if (confirmDelete) {
       personsService.remove(id).then(() => {
         props.setPersons((previousPersons) =>
           previousPersons.filter((person) => person.id !== id)
@@ -79,7 +79,22 @@ const App = () => {
     const currentName = persons.filter((person) => person.name === newName);
 
     if (currentName.length > 0) {
-      alert(`${newName} is already added to the phonebook`);
+      const confirmUpdate = window.confirm(
+        `${newName} is already added to the phonebook. Replace the old number with a new one?`
+      );
+      if (confirmUpdate) {
+        const existingPerson = currentName[0];
+        const updatedPerson = { ...existingPerson, phone: newPhone };
+        personsService.update(existingPerson.id, updatedPerson).then(() => {
+          setPersons((previousPersons) =>
+            previousPersons.map((person) =>
+              person.id === existingPerson.id ? updatedPerson : person
+            )
+          );
+          setNewName("");
+          setNewPhone("");
+        });
+      }
     } else {
       const newPerson = { name: newName, phone: newPhone };
 
