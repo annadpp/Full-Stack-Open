@@ -63,16 +63,19 @@ const App = () => {
     e.preventDefault();
     const currentName = persons.filter((person) => person.name === newName);
 
-    currentName.length === 0
-      ? (() => {
-          setPersons([
-            ...persons,
-            { name: newName, phone: newPhone, id: persons.length + 1 },
-          ]);
-        })()
-      : alert(`${newName} is already added to the phonebook`);
-    setNewName("");
-    setNewPhone("");
+    if (currentName.length > 0) {
+      alert(`${newName} is already added to the phonebook`);
+    } else {
+      const newPerson = { name: newName, phone: newPhone };
+
+      axios
+        .post("http://localhost:3001/persons", newPerson)
+        .then((response) => {
+          setPersons((previousPersons) => [...previousPersons, response.data]);
+          setNewName("");
+          setNewPhone("");
+        });
+    }
   };
 
   const filterNames = (e) => {
