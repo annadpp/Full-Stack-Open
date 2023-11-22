@@ -28,15 +28,27 @@ const PersonForm = (props) => {
 };
 
 const Persons = (props) => {
-  const handleDelete = (id, name) => {
+  const { setPersons } = props;
+
+  const handleDelete = (id, name, handleSetErrorMessage) => {
     const confirmDelete = window.confirm(`Delete ${name}?`);
 
     if (confirmDelete) {
-      personsService.remove(id).then(() => {
-        props.setPersons((previousPersons) =>
-          previousPersons.filter((person) => person.id !== id)
-        );
-      });
+      personsService
+        .remove(id)
+        .then(() => {
+          setPersons((previousPersons) =>
+            previousPersons.filter((person) => person.id !== id)
+          );
+        })
+        .catch((error) => {
+          handleSetErrorMessage(
+            `${name} has already been deleted from the server.`
+          );
+          setTimeout(() => {
+            handleSetErrorMessage(null);
+          }, 5000);
+        });
     }
   };
 
@@ -46,7 +58,11 @@ const Persons = (props) => {
       {props.persons.map((person) => (
         <p key={person.id}>
           {person.name} {person.phone}
-          <button onClick={() => handleDelete(person.id, person.name)}>
+          <button
+            onClick={() =>
+              handleDelete(person.id, person.name, props.handleSetErrorMessage)
+            }
+          >
             Delete
           </button>
         </p>
@@ -55,12 +71,14 @@ const Persons = (props) => {
   );
 };
 
-const Notification = ({ message }) => {
-  if (message === null) {
+const Notification = ({ successMessage, errorMessage }) => {
+  if (successMessage) {
+    return <div className="success">{successMessage}</div>;
+  } else if (errorMessage) {
+    return <div className="error">{errorMessage}</div>;
+  } else {
     return null;
   }
-
-  return <div className="success">{message}</div>;
 };
 
 const App = () => {
@@ -69,6 +87,7 @@ const App = () => {
   const [newPhone, setNewPhone] = useState("");
   const [filter, setFilter] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     personsService.getAll().then((initialPersons) => {
@@ -95,19 +114,29 @@ const App = () => {
       if (confirmUpdate) {
         const existingPerson = currentName[0];
         const updatedPerson = { ...existingPerson, phone: newPhone };
-        personsService.update(existingPerson.id, updatedPerson).then(() => {
-          setPersons((previousPersons) =>
-            previousPersons.map((person) =>
-              person.id === existingPerson.id ? updatedPerson : person
-            )
-          );
-          setNewName("");
-          setNewPhone("");
-          setSuccessMessage(`Changed number for ${newName}`);
-          setTimeout(() => {
-            setSuccessMessage(null);
-          }, 5000);
-        });
+        personsService
+          .update(existingPerson.id, updatedPerson)
+          .then(() => {
+            setPersons((previousPersons) =>
+              previousPersons.map((person) =>
+                person.id === existingPerson.id ? updatedPerson : person
+              )
+            );
+            setNewName("");
+            setNewPhone("");
+            setSuccessMessage(`Changed number for ${newName}`);
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 5000);
+          })
+          .catch((error) => {
+            setErrorMessage(
+              `Failed to udpate number for ${newName}. Information of ${newName} has already been removed from the server`
+            );
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 5000);
+          });
       }
     } else {
       const newPerson = { name: newName, phone: newPhone };
@@ -133,11 +162,18 @@ const App = () => {
     ? persons.filter((person) => person.name.toLowerCase().includes(filter))
     : persons;
 
+  const handleSetErrorMessage = (message) => {
+    setErrorMessage(message);
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
 
-      <Notification message={successMessage} />
+      <Notification
+        successMessage={successMessage}
+        errorMessage={errorMessage}
+      />
 
       <Filter filter={filter} onChange={filterNames} />
 
@@ -151,7 +187,11 @@ const App = () => {
         addPerson={addPerson}
       />
 
-      <Persons persons={personsToShow} setPersons={setPersons} />
+      <Persons
+        persons={personsToShow}
+        setPersons={setPersons}
+        handleSetErrorMessage={handleSetErrorMessage}
+      />
     </div>
   );
 };
