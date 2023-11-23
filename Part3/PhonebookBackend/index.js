@@ -28,6 +28,15 @@ app.get("/", (request, response) => {
   response.send("<h1>Hello World!</h1>");
 });
 
+app.get("/info", (request, response) => {
+  const numberOfPeople = persons.length;
+  const currentTime = new Date().toString();
+
+  response.send(
+    `<p>Phonebook has info for ${numberOfPeople} people</p><p>${currentTime}</p>`
+  );
+});
+
 app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
