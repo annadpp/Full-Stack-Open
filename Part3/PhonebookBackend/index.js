@@ -62,17 +62,17 @@ app.delete("/api/persons/:id", (request, response, next) => {
 app.post("/api/persons", (request, response) => {
   const body = request.body;
   const name = body.name;
-  const number = body.number;
+  const phone = body.phone;
 
   if (!name) return response.status(400).json({ error: "name missing" });
-  if (!number) return response.status(400).json({ error: "number missing" });
+  if (!phone) return response.status(400).json({ error: "number missing" });
 
   Person.exists({ name }).then((personExists) => {
     if (personExists) {
       return response.status(400).json({ error: "name must be unique" });
     }
 
-    const newPerson = new Person({ name, number });
+    const newPerson = new Person({ name, phone });
     newPerson
       .save()
       .then((savedPerson) => {
@@ -83,6 +83,21 @@ app.post("/api/persons", (request, response) => {
         response.status(500).json({ error: "failed to save to the database" });
       });
   });
+});
+
+app.put("/api/persons/:id", (request, response, next) => {
+  const body = request.body;
+
+  const updatedPerson = {
+    name: body.name,
+    phone: body.phone,
+  };
+
+  Person.findByIdAndUpdate(request.params.id, updatedPerson, { new: true })
+    .then((updatedPerson) => {
+      response.json(updatedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 const errorHandler = (error, request, response, next) => {
