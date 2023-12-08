@@ -5,7 +5,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const app = express();
 
-const Person = require("./models/person");
+const Person = require("./models/person"); // Import the Person model
 
 app.use(cors());
 app.use(express.json());
@@ -27,12 +27,12 @@ app.get("/", (request, response) => {
 });
 
 app.get("/info", (request, response) => {
-  const numberOfPeople = persons.length;
-  const currentTime = new Date().toString();
-
-  response.send(
-    `<p>Phonebook has info for ${numberOfPeople} people</p><p>${currentTime}</p>`
-  );
+  Person.countDocuments({}, (err, count) => {
+    const currentTime = new Date().toString();
+    response.send(
+      `<p>Phonebook has info for ${count} people</p><p>${currentTime}</p>`
+    );
+  });
 });
 
 app.get("/api/persons", (request, response) => {
@@ -40,7 +40,7 @@ app.get("/api/persons", (request, response) => {
 });
 
 app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
+  const id = request.params.id;
   Person.findById(id).then((person) => {
     if (person) {
       response.json(person);
@@ -51,10 +51,10 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  Person.findByIdAndRemove(id)
+  const id = request.params.id;
+  Person.findByIdAndDelete(id)
     .then(() => response.status(204).end())
-    .catch((error) => response.status(400).json({ error: "malformatted id" }));
+    .catch((error) => next(error));
 });
 
 app.post("/api/persons", (request, response) => {
@@ -77,6 +77,7 @@ app.post("/api/persons", (request, response) => {
         response.json(savedPerson);
       })
       .catch((error) => {
+        console.error("Error saving person to the database:", error);
         response.status(500).json({ error: "Failed to save to the database" });
       });
   });
