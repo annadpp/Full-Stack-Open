@@ -59,7 +59,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
     .catch((error) => next(error));
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body;
   const name = body.name;
   const phone = body.phone;
@@ -78,25 +78,19 @@ app.post("/api/persons", (request, response) => {
       .then((savedPerson) => {
         response.json(savedPerson);
       })
-      .catch((error) => {
-        console.error("error saving person to the database:", error);
-        response.status(500).json({ error: "failed to save to the database" });
-      });
+      .catch((error) => next(error));
   });
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
-  const body = request.body;
+  const { name, phone } = request.body;
 
-  const updatedPerson = {
-    name: body.name,
-    phone: body.phone,
-  };
-
-  Person.findByIdAndUpdate(request.params.id, updatedPerson, { new: true })
-    .then((updatedPerson) => {
-      response.json(updatedPerson);
-    })
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { name, phone },
+    { new: true, runValidators: true, context: "query" }
+  )
+    .then((person) => response.json(person))
     .catch((error) => next(error));
 });
 
@@ -104,13 +98,16 @@ const errorHandler = (error, request, response, next) => {
   console.error(error.message);
 
   if (error.name === "CastError") {
-    return response.status(400).json({ error: "malformatted id" });
+    return response.status(400).json({ error: "Malformatted id" });
+  }
+
+  if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);
 };
 
-// This has to be the last loaded middleware.
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
