@@ -23,8 +23,32 @@ const favoriteBlog = (blogs) => {
   };
 };
 
+const mostBlogs = (blogs) => {
+  if (!blogs.length) return;
+
+  const blogCounts = {};
+
+  blogs.forEach((blog) => {
+    if (blog.author in blogCounts) {
+      blogCounts[blog.author]++;
+    } else {
+      blogCounts[blog.author] = 1;
+    }
+  });
+
+  const highestCount = Object.keys(blogCounts).reduce((a, b) =>
+    blogCounts[a] > blogCounts[b] ? a : b
+  );
+
+  return {
+    author: highestCount,
+    blogs: blogCounts[highestCount],
+  };
+};
+
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
+  mostBlogs,
 };

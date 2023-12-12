@@ -96,3 +96,20 @@ describe("total likes", () => {
 
   test("all blogs", () => expect(listHelper.totalLikes(blogs)).toBe(36));
 });
+
+describe("most blogs", () => {
+  test("empty list is undefined", () =>
+    expect(listHelper.mostBlogs([])).toBeUndefined());
+
+  test("single blog", () =>
+    expect(listHelper.mostBlogs(listWithOneBlog)).toEqual({
+      author: "Edsger W. Dijkstra",
+      blogs: 1,
+    }));
+
+  test("multiple blogs", () =>
+    expect(listHelper.mostBlogs(blogs)).toEqual({
+      author: "Robert C. Martin",
+      blogs: 3,
+    }));
+});
