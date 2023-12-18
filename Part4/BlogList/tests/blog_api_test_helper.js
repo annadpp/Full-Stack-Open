@@ -39,10 +39,17 @@ const initialBlogs = [
   },
 ];
 
+const baseBlog = {
+  author: "Author",
+  title: "Title",
+  url: "https://mockup/blog",
+};
+
 const databaseBlogs = async () =>
   (await Blog.find({})).map((blog) => blog.toJSON());
 
 module.exports = {
   initialBlogs,
   databaseBlogs,
+  baseBlog,
 };

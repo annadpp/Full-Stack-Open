@@ -36,17 +36,13 @@ describe("create new blog post", () => {
   test("post created successfully", async () => {
     await api
       .post("/api/blogs")
-      .send({
-        author: "Author",
-        title: "Title",
-        url: "https://mockup/blog",
-      })
+      .send(helper.baseBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
 
     const allBlogs = await helper.databaseBlogs();
     expect(allBlogs).toHaveLength(helper.initialBlogs.length + 1);
-    expect(allBlogs.map((blog) => blog.title)).toContain("Title");
+    expect(allBlogs.map((blog) => blog.title)).toContain(helper.baseBlog.title);
   });
 });
 
