@@ -16,6 +16,19 @@ router.post("/", (request, response) => {
   });
 });
 
+router.put("/:id", async (request, response) => {
+  const { title, author, url, likes } = request.body;
+
+  const blog = await Blog.findByIdAndUpdate(
+    request.params.id,
+    { title, author, url, likes },
+    { new: true, runValidators: true, overwrite: true }
+  );
+
+  if (blog === null) return response.status(404).end();
+  response.json(blog);
+});
+
 router.delete("/:id", async (request, response) => {
   await Blog.findByIdAndRemove(request.params.id);
   response.status(204).end();

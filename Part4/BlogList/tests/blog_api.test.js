@@ -68,4 +68,33 @@ describe("delete blog", () => {
   });
 });
 
+describe("update blog", () => {
+  test("post updated successfully", async () => {
+    const initialBlog = await Blog.findOne({
+      title: { $ne: helper.baseBlog.title },
+    });
+
+    await api
+      .put(`/api/blogs/${initialBlog.id}`)
+      .send(helper.baseBlog)
+      .expect(200);
+
+    const blog = await Blog.findById(initialBlog.id);
+
+    for (const key of Object.keys(helper.baseBlog))
+      expect(blog[key]).toEqual(helper.baseBlog[key]);
+  });
+
+  test("if invalid ID, 404", async () =>
+    api
+      .put(`/api/blogs/${await helper.nonExistingId()}`)
+      .send(helper.baseBlog)
+      .expect(404));
+
+  test("if missing title or url, 400", async () => {
+    const initialBlog = await Blog.findOne({});
+    await api.put(`/api/blogs/${initialBlog.id}`).send({}).expect(400);
+  });
+});
+
 afterAll(() => mongoose.connection.close());
