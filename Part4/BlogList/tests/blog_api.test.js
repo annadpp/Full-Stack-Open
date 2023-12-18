@@ -53,6 +53,9 @@ describe("create new blog post", () => {
 
     expect(response.body.likes).toEqual(0);
   });
+
+  test("if missing title or url, 400", () =>
+    api.post("/api/blogs").send({}).expect(400));
 });
 
 afterAll(() => mongoose.connection.close());
