@@ -44,6 +44,15 @@ describe("create new blog post", () => {
     expect(allBlogs).toHaveLength(helper.initialBlogs.length + 1);
     expect(allBlogs.map((blog) => blog.title)).toContain(helper.baseBlog.title);
   });
+
+  test("likes is set to 0 by default", async () => {
+    const response = await api
+      .post("/api/blogs")
+      .send(helper.baseBlog)
+      .expect(201);
+
+    expect(response.body.likes).toEqual(0);
+  });
 });
 
 afterAll(() => mongoose.connection.close());
