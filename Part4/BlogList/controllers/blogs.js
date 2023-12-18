@@ -16,4 +16,9 @@ router.post("/", (request, response) => {
   });
 });
 
+router.delete("/:id", async (request, response) => {
+  await Blog.findByIdAndRemove(request.params.id);
+  response.status(204).end();
+});
+
 module.exports = router;

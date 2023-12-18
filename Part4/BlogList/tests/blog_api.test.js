@@ -58,4 +58,14 @@ describe("create new blog post", () => {
     api.post("/api/blogs").send({}).expect(400));
 });
 
+describe("delete blog", () => {
+  test("post deleted successfully", async () => {
+    const id = (await Blog.findOne({})).id;
+    await api.delete(`/api/blogs/${id}`).expect(204);
+    expect((await helper.databaseBlogs()).map((blog) => blog.id)).not.toContain(
+      id
+    );
+  });
+});
+
 afterAll(() => mongoose.connection.close());
