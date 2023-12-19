@@ -7,7 +7,14 @@ const bcrypt = require("bcrypt");
 const { BCRYPT_SALT_ROUNDS } = require("../utils/config");
 
 router.get("/", async (request, response) =>
-  response.json(await User.find({}))
+  response.json(
+    await User.find({}).populate("blogs", {
+      title: 1,
+      author: 1,
+      url: 1,
+      likes: 1,
+    })
+  )
 );
 
 router.post("/", async (request, response) => {
