@@ -35,9 +35,13 @@ describe("exercise tests", () => {
 });
 
 describe("create new blog post", () => {
+  let user;
+  beforeEach(async () => (user = await helper.baseUser()));
+
   test("post created successfully", async () => {
     await api
       .post("/api/blogs")
+      .set(helper.authHeader(user))
       .send(helper.baseBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -49,28 +53,31 @@ describe("create new blog post", () => {
   test("likes is set to 0 by default", async () => {
     const response = await api
       .post("/api/blogs")
+      .set(helper.authHeader(user))
       .send(helper.baseBlog)
       .expect(201);
 
     expect(response.body.likes).toEqual(0);
   });
 
-  test("returns 400 if title and url are missing", async () => {
-    const blogWithoutTitleAndUrl = {
-      author: "Author",
-      likes: 5,
-    };
-
-    await api.post("/api/blogs").send(blogWithoutTitleAndUrl).expect(400);
-  });
+  test("returns 400 if title and url are missing", () =>
+    api.post("/api/blogs").set(helper.authHeader(user)).send({}).expect(400));
 });
 
 describe("delete blog", () => {
+  //haven't been able to fix it -> this is the closest I got
   test("post deleted successfully", async () => {
-    const id = (await Blog.findOne({})).id;
-    await api.delete(`/api/blogs/${id}`).expect(204);
-    expect((await helper.databaseBlogs()).map((blog) => blog.id)).not.toContain(
-      id
+    const user = await helper.baseUser();
+    const blogToDelete = (await helper.databaseBlogs())[0];
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set(helper.authHeader(user))
+      .expect(204);
+
+    const blogsAfterDelete = await helper.databaseBlogs();
+    expect(blogsAfterDelete.map((blog) => blog.id)).not.toContain(
+      blogToDelete.id
     );
   });
 });

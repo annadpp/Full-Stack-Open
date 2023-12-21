@@ -1,11 +1,11 @@
 const User = require("../models/user");
 const express = require("express");
-const jwt = require("jsonwebtoken");
+
+const { signToken } = require("../utils/auth");
 
 const router = express.Router();
 
 const bcrypt = require("bcrypt");
-const { JWT_SECRET } = require("../utils/config");
 
 router.post("/", async (request, response) => {
   const { username, password } = request.body;
@@ -19,14 +19,7 @@ router.post("/", async (request, response) => {
       error: "invalid username or password",
     });
 
-  const token = jwt.sign(
-    {
-      username: user.username,
-      id: user._id,
-    },
-    JWT_SECRET,
-    { expiresIn: 60 * 60 }
-  );
+  const token = signToken(user);
 
   response
     .status(200)
