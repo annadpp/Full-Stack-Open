@@ -49,10 +49,16 @@ const databaseBlogs = async () =>
   (await Blog.find({})).map((blog) => blog.toJSON());
 
 const nonExistingId = async () => {
-  const blog = new Blog(baseBlog);
+  const blog = new Blog({
+    author: "nonexisting",
+    title: "nonexisting",
+    url: "http://nonexisting.com",
+  });
+
   await blog.save();
-  await blog.remove();
-  return blog._id.toString();
+  const deletedBlog = await Blog.findByIdAndRemove(blog._id);
+
+  return deletedBlog ? deletedBlog._id.toString() : null;
 };
 
 module.exports = {

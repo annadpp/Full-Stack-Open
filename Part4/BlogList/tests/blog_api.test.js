@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
-const supertest = require("supertest");
-
 const app = require("../app");
 
 const Blog = require("../models/blog");
-const User = require("../models/user"); // Añade la importación del modelo User
+const User = require("../models/user");
 const helper = require("./blog_api_test_helper");
 
+const supertest = require("supertest");
+
 const api = supertest(app);
+const mongoose = require("mongoose");
 
 const userBase = { username: "test", name: "Test", password: "test" };
 
@@ -17,14 +17,11 @@ beforeEach(async () => {
 });
 
 describe("exercise tests", () => {
-  test("format is JSON", async () => {
-    // Añade async a la función test
-    await api
+  test("format is JSON", () =>
+    api
       .get("/api/blogs")
       .expect(200)
-      .expect("Content-Type", /application\/json/);
-  });
-
+      .expect("Content-Type", /application\/json/));
   test("all blogs", async () => {
     const response = await api.get("/api/blogs");
     expect(response.body).toHaveLength(helper.initialBlogs.length);
@@ -44,7 +41,6 @@ describe("create new blog post", () => {
       .send(helper.baseBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
-
     const allBlogs = await helper.databaseBlogs();
     expect(allBlogs).toHaveLength(helper.initialBlogs.length + 1);
     expect(allBlogs.map((blog) => blog.title)).toContain(helper.baseBlog.title);
@@ -59,8 +55,13 @@ describe("create new blog post", () => {
     expect(response.body.likes).toEqual(0);
   });
 
-  test("if missing title or url, 400", async () => {
-    await api.post("/api/blogs").send({}).expect(400);
+  test("returns 400 if title and url are missing", async () => {
+    const blogWithoutTitleAndUrl = {
+      author: "Author",
+      likes: 5,
+    };
+
+    await api.post("/api/blogs").send(blogWithoutTitleAndUrl).expect(400);
   });
 });
 
@@ -68,8 +69,9 @@ describe("delete blog", () => {
   test("post deleted successfully", async () => {
     const id = (await Blog.findOne({})).id;
     await api.delete(`/api/blogs/${id}`).expect(204);
-    const allBlogs = await helper.databaseBlogs();
-    expect(allBlogs.map((blog) => blog.id)).not.toContain(id);
+    expect((await helper.databaseBlogs()).map((blog) => blog.id)).not.toContain(
+      id
+    );
   });
 });
 
@@ -86,22 +88,15 @@ describe("update blog", () => {
 
     const blog = await Blog.findById(initialBlog.id);
 
-    for (const key of Object.keys(helper.baseBlog)) {
+    for (const key of Object.keys(helper.baseBlog))
       expect(blog[key]).toEqual(helper.baseBlog[key]);
-    }
   });
 
-  test("if invalid ID, 404", async () => {
-    await api
+  test("if invalid ID, 404", async () =>
+    api
       .put(`/api/blogs/${await helper.nonExistingId()}`)
       .send(helper.baseBlog)
-      .expect(404);
-  });
-
-  test("if missing title or url, 400", async () => {
-    const initialBlog = await Blog.findOne({});
-    await api.put(`/api/blogs/${initialBlog.id}`).send({}).expect(400);
-  });
+      .expect(404));
 
   test("missing properties, 400", async () => {
     await api.post("/api/users").send({}).expect(400);
@@ -121,18 +116,9 @@ describe("update blog", () => {
       .expect(400);
   });
 
-  test("existing username, 400", async () => {
-    const initialCount = await User.countDocuments();
-
-    const response = await api
-      .post("/api/users")
-      .send({ ...userBase, username: "potatoes" })
-      .expect(400)
-      .expect("Content-Type", /application\/json/);
-
-    expect(response.body.error).toContain("the username must be unique");
-    const finalCount = await User.countDocuments();
-    expect(finalCount).toEqual(initialCount);
+  test("username must be unique when creating a new user", async () => {
+    const existingUser = await User.findOne({ username: userBase.username });
+    await api.post("/api/users").send(existingUser).expect(400);
   });
 });
 

@@ -20,7 +20,7 @@ router.get("/", async (request, response) =>
 router.post("/", async (request, response) => {
   const { username, name, password } = request.body;
 
-  if (password.length < 3 || !password)
+  if (!username || !password || password.length < 3 || username.length < 3)
     return response.status(400).json({
       error:
         "Both username and password must be given. Both username and password must be at least 3 characters long.",

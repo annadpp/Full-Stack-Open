@@ -5,77 +5,65 @@ const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
-const { JWT_SECRET } = require("../utils/config");
-
-const middleware = require("../utils/middleware");
+const getTokenFrom = (request) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+    return authorization.substring(7);
+  }
+  return null;
+};
 
 router.get("/", async (request, response) => {
   const blogs = await Blog.find({}).populate("user", { username: 1, name: 1 });
   response.json(blogs);
 });
 
-router.post("/", middleware.tokenExtractor, async (request, response) => {
-  if (!request.authToken) {
-    return response.status(401).json({ error: "Token is missing" });
+router.post("/", async (request, response) => {
+  const { title, url } = request.body;
+
+  if (!title || !url) {
+    return response.status(400).json({ error: "Title and url are required" });
   }
 
-  try {
-    const decodedToken = jwt.verify(request.authToken, JWT_SECRET);
-    const { title, author, url, likes } = request.body;
+  const token = getTokenFrom(request);
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-    const blog = new Blog({ user: decodedToken.id, title, author, url, likes });
-    const user = await User.findById(decodedToken.id);
+  if (!token || !decodedToken.id) {
+    return response.status(401).json({ error: "token missing or invalid" });
+  }
 
-    if (user === null) {
-      return response
-        .status(401)
-        .json({ error: "Token user authentication not found" });
-    }
+  const user = await User.findById(decodedToken.id);
 
-    const savedBlog = await blog.save();
-    user.blogs.push(savedBlog._id);
-    await user.save();
+  const blog = new Blog({
+    title,
+    url,
+    user: user._id,
+  });
 
-    response.status(201).json(savedBlog);
-  } catch (error) {
-    return response.status(401).json({ error: "Token is not valid" });
+  const savedBlog = await blog.save();
+
+  user.blogs = user.blogs.concat(savedBlog._id);
+  await user.save();
+
+  response.status(201).json(savedBlog);
+});
+
+router.put("/:id", async (request, response) => {
+  const { id } = request.params;
+  const updatedBlog = request.body;
+
+  const result = await Blog.findByIdAndUpdate(id, updatedBlog, { new: true });
+
+  if (result) {
+    response.json(result);
+  } else {
+    response.status(404).json({ error: "Blog not found" });
   }
 });
 
-router.put("/:id", middleware.tokenExtractor, async (request, response) => {
-  if (!request.authToken) {
-    return response.status(401).json({ error: "Token is missing" });
-  }
-
-  try {
-    const decodedToken = jwt.verify(request.authToken, JWT_SECRET);
-    const { title, author, url, likes } = request.body;
-
-    const blog = await Blog.findByIdAndUpdate(
-      request.params.id,
-      { title, author, url, likes },
-      { new: true, runValidators: true, overwrite: true }
-    );
-
-    if (blog === null) return response.status(404).end();
-    response.json(blog);
-  } catch (error) {
-    return response.status(401).json({ error: "Token is not valid" });
-  }
-});
-
-router.delete("/:id", middleware.tokenExtractor, async (request, response) => {
-  if (!request.authToken) {
-    return response.status(401).json({ error: "Token is missing" });
-  }
-
-  try {
-    const decodedToken = jwt.verify(request.authToken, JWT_SECRET);
-    await Blog.findByIdAndRemove(request.params.id);
-    response.status(204).end();
-  } catch (error) {
-    return response.status(401).json({ error: "Token is not valid" });
-  }
+router.delete("/:id", async (request, response) => {
+  await Blog.findByIdAndRemove(request.params.id);
+  response.status(204).end();
 });
 
 module.exports = router;
