@@ -1,7 +1,9 @@
 const Blog = require("../models/blog");
-const User = require("../models/user");
+const middleware = require("../utils/middleware");
+
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
 
 const router = express.Router();
 
@@ -18,7 +20,7 @@ router.get("/", async (request, response) => {
   response.json(blogs);
 });
 
-router.post("/", async (request, response) => {
+router.post("/", middleware.userExtractor, async (request, response) => {
   const { title, url } = request.body;
 
   if (!title || !url) {
@@ -32,7 +34,7 @@ router.post("/", async (request, response) => {
     return response.status(401).json({ error: "token missing or invalid" });
   }
 
-  const user = await User.findById(decodedToken.id);
+  const user = request.authUser;
 
   const blog = new Blog({
     title,
