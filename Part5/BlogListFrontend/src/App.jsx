@@ -11,6 +11,7 @@ const App = () => {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [url, setUrl] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
   const [changeMessage, setChangeMessage] = useState(null);
 
   useEffect(() => {
@@ -22,6 +23,7 @@ const App = () => {
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
       setUser(user);
+      blogService.setToken(user.token);
     }
   }, []);
 
@@ -37,6 +39,7 @@ const App = () => {
 
       window.localStorage.setItem("loggedBloglistUser", JSON.stringify(user));
 
+      blogService.setToken(user.token);
       setUser(user);
       setUsername("");
       setPassword("");
@@ -70,6 +73,9 @@ const App = () => {
       setAuthor("");
       setUrl("");
 
+      setChangeMessage(
+        `A new blog ${blogObject.title} by ${blogObject.author} added`
+      );
       setTimeout(() => {
         setChangeMessage(null);
       }, 5000);
@@ -80,6 +86,7 @@ const App = () => {
     return (
       <div>
         <h2>Log in to application</h2>
+        <Message message={errorMessage} />
         <form onSubmit={handleLogin}>
           <div>
             username
@@ -108,6 +115,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
+      <Message message={changeMessage} />
       <p> {user.name} logged in </p>
       <button type="submit" onClick={handleLogout}>
         Logout
