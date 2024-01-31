@@ -3,7 +3,9 @@ const Notification = ({ message }) => {
     return null;
   }
 
-  return <div className={message.type}>{message.text}</div>;
+  const className = message.includes("Wrong" || "Error") ? "error" : "success";
+
+  return <div className={`${className}`}>{message}</div>;
 };
 
 export default Notification;

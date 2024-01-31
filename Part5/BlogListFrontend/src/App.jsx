@@ -1,8 +1,11 @@
+// app.jsx
 import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import Notification from "./components/Notification";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
+import "./index.css";
+
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState("");
@@ -13,6 +16,7 @@ const App = () => {
   const [likes, setLikes] = useState("");
   const [user, setUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -34,8 +38,8 @@ const App = () => {
         username,
         password,
       });
-      window.localStorage.setItem("loggedBloglistUser", JSON.stringify(user));
 
+      window.localStorage.setItem("loggedBloglistUser", JSON.stringify(user));
       blogService.setToken(user.token);
       setUser(user);
       setUsername("");
@@ -47,27 +51,40 @@ const App = () => {
       }, 5000);
     }
   };
+
   const handleLogout = () => {
     window.localStorage.clear();
     setUser(null);
   };
 
-  const addBlog = (event) => {
+  const addBlog = async (event) => {
     event.preventDefault();
     const blogObject = {
-      title: title,
-      author: author,
-      url: url,
+      title,
+      author,
+      url,
       user: user.name,
-      likes: likes,
+      likes,
     };
 
-    blogService.create(blogObject).then((returnedBlog) => {
-      setBlogs(blogs.concat(returnedBlog));
-    });
+    try {
+      const returnedBlog = await blogService.create(blogObject);
+      setBlogs([...blogs, returnedBlog]);
+      setSuccessMessage(
+        `a new blog ${blogObject.title} by ${blogObject.author} added`
+      );
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 5000);
+    } catch (error) {
+      setErrorMessage("Error creating a new blog");
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+    }
   };
 
-  if (user === null) {
+  if (!user) {
     return (
       <div>
         <h2>Log in to application</h2>
@@ -78,7 +95,6 @@ const App = () => {
             <input
               type="text"
               value={username}
-              name="Username"
               onChange={({ target }) => setUsername(target.value)}
             />
           </div>
@@ -87,7 +103,6 @@ const App = () => {
             <input
               type="password"
               value={password}
-              name="Password"
               onChange={({ target }) => setPassword(target.value)}
             />
           </div>
@@ -96,10 +111,12 @@ const App = () => {
       </div>
     );
   }
+
   return (
     <div>
       <h2>blogs</h2>
-      <p> {user.name} logged in </p>
+      <Notification message={errorMessage || successMessage} />
+      <p>{user.name} logged in</p>
       <button type="submit" onClick={handleLogout}>
         logout
       </button>
@@ -111,7 +128,6 @@ const App = () => {
             <input
               type="text"
               value={title}
-              name="Title"
               onChange={({ target }) => setTitle(target.value)}
             />
           </div>
@@ -120,7 +136,6 @@ const App = () => {
             <input
               type="text"
               value={author}
-              name="Author"
               onChange={({ target }) => setAuthor(target.value)}
             />
           </div>
@@ -129,7 +144,6 @@ const App = () => {
             <input
               type="url"
               value={url}
-              name="url"
               onChange={({ target }) => setUrl(target.value)}
             />
           </div>
@@ -138,7 +152,6 @@ const App = () => {
             <input
               type="likes"
               value={likes}
-              name="likes"
               onChange={({ target }) => setLikes(target.value)}
             />
           </div>
@@ -151,4 +164,5 @@ const App = () => {
     </div>
   );
 };
+
 export default App;
