@@ -18,22 +18,16 @@ const AddBlogForm = ({ createBlog }) => {
     setUrl(event.target.value);
   };
 
-  const handleLikesChange = (event) => {
-    setLikes(event.target.value);
-  };
-
   const addBlog = (event) => {
     event.preventDefault();
     createBlog({
       title: title,
       author: author,
       url: url,
-      likes: likes,
     });
     setTitle("");
     setAuthor("");
     setUrl("");
-    setLikes("");
   };
 
   return (
@@ -62,15 +56,7 @@ const AddBlogForm = ({ createBlog }) => {
           url:
           <input type="url" value={url} name="url" onChange={handleUrlChange} />
         </div>
-        <div>
-          likes:
-          <input
-            type="likes"
-            value={likes}
-            name="likes"
-            onChange={handleLikesChange}
-          />
-        </div>
+
         <button type="submit">create</button>
       </form>
     </div>
