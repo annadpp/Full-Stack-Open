@@ -105,6 +105,28 @@ describe("Bloglist app", function () {
         cy.contains("view").click();
         cy.contains("remove").should("not.exist");
       });
+
+      it.only("orders blogs by likes", function () {
+        cy.contains("create new blog").click();
+        cy.get("#title").type("The title with most likes");
+        cy.get("#author").type("atest");
+        cy.get("#url").type("https://www.atest.com");
+        cy.get("#create-button").click({ force: true });
+
+        cy.contains("create new blog").click();
+        cy.get("#title").type("The title with the second most likes");
+        cy.get("#author").type("btest");
+        cy.get("#url").type("https://www.btest.com");
+        cy.get("#create-button").click({ force: true });
+
+        cy.contains("Title with most likes").contains("view").click();
+        cy.get("button").contains("like").click();
+
+        cy.get(".blog").eq(0).should("contain", "Title with most likes");
+        cy.get(".blog")
+          .eq(1)
+          .should("contain", "Title with the second most likes");
+      });
     });
   });
 });
