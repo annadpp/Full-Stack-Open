@@ -47,5 +47,22 @@ describe("Bloglist app", function () {
       cy.get("#create-button").click({ force: true });
       cy.contains("test title test author");
     });
+
+    describe("and if a blog exists", function () {
+      beforeEach(function () {
+        cy.contains("create new blog").click();
+        cy.get("#title").type("test title");
+        cy.get("#author").type("test author");
+        cy.get("#url").type("http://testurl.com");
+        cy.get("#create-button").click({ force: true });
+        cy.contains("test title test author");
+      });
+
+      it.only("the user can like it", function () {
+        cy.contains("view").click();
+        cy.contains("0").contains("likes").click();
+        cy.contains("1");
+      });
+    });
   });
 });
