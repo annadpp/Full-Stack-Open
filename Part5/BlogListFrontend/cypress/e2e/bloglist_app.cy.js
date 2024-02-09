@@ -63,6 +63,12 @@ describe("Bloglist app", function () {
         cy.contains("0").contains("likes").click();
         cy.contains("1");
       });
+
+      it("user can delete their blogs", function () {
+        cy.contains("view").click();
+        cy.get("#remove-button").click();
+        cy.contains("remove").should("not.exist");
+      });
     });
   });
 });
