@@ -3,9 +3,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { addVotes } from "../reducers/anecdoteReducer";
 
 const AnecdoteList = () => {
-  const anecdotes = useSelector((state) =>
-    state.sort((x, y) => y.votes - x.votes)
-  );
+  const anecdotes = useSelector((state) => {
+    if (state.filters === null) {
+      return state.anecdotes.sort((x, y) => y.votes - x.votes);
+    }
+    return state.anecdotes
+      .filter((anecdote) =>
+        anecdote.content.toLowerCase().includes(state.filters.toLowerCase())
+      )
+      .sort((x, y) => y.votes - x.votes);
+  });
 
   const dispatch = useDispatch();
 
