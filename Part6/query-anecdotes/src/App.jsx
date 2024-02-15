@@ -1,7 +1,7 @@
 import AnecdoteForm from "./components/AnecdoteForm";
 import Notification from "./components/Notification";
 import { useQuery } from "react-query";
-import { getAnecdotes } from "../request";
+import { getAnecdotes } from "./request";
 
 const App = () => {
   const handleVote = (anecdote) => {
@@ -9,7 +9,7 @@ const App = () => {
   };
 
   const result = useQuery("anecdotes", getAnecdotes, {
-    retry: 3,
+    retry: 1,
   });
 
   if (result.isLoading) {
