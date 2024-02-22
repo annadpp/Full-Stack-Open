@@ -120,6 +120,15 @@ const CreateNew = (props) => {
         </div>
         <button>create</button>
       </form>
+      <button
+        onClick={() => {
+          content.reset();
+          authors.reset();
+          info.reset();
+        }}
+      >
+        reset
+      </button>
     </div>
   );
 };
