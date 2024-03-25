@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { Table } from "react-bootstrap";
 
 const UsersView = () => {
@@ -17,7 +18,11 @@ const UsersView = () => {
           </tr>
           {displayUsers.map((displayUser) => (
             <tr key={displayUser.id}>
-              <td>{displayUser.username}</td>
+              <td>
+                <Link to={`/users/${displayUser.id}`}>
+                  {displayUser.username}
+                </Link>
+              </td>
               <td>{displayUser.blogs.length}</td>
             </tr>
           ))}

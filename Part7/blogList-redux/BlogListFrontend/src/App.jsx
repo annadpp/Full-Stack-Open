@@ -1,11 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Routes, Route, Link } from "react-router-dom";
 import Notification from "./components/Notification";
 import AddBlogForm from "./components/AddBlogForm";
 import BlogList from "./components/BlogList";
 import LoginForm from "./components/LoginForm";
 import Togglable from "./components/Togglable";
 import UsersView from "./components/UsersView";
+import User from "./components/User";
 import { logout } from "./reducers/authReducer";
 import { initializeBlogs } from "./reducers/blogReducer";
 import { initializeUser } from "./reducers/authReducer";
@@ -42,10 +44,11 @@ const App = () => {
       <button type="submit" onClick={handleLogout}>
         logout
       </button>
-      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-        <AddBlogForm />
-      </Togglable>
-      <BlogList />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/users" element={<UsersView />} />
+        <Route path="/users/:id" element={<User />} />
+      </Routes>
     </div>
   );
 };
