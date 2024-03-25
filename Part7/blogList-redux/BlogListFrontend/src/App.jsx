@@ -5,6 +5,7 @@ import AddBlogForm from "./components/AddBlogForm";
 import BlogList from "./components/BlogList";
 import LoginForm from "./components/LoginForm";
 import Togglable from "./components/Togglable";
+import UsersView from "./components/UsersView";
 import { logout } from "./reducers/authReducer";
 import { initializeBlogs } from "./reducers/blogReducer";
 import { initializeUser } from "./reducers/authReducer";
@@ -37,6 +38,7 @@ const App = () => {
       <h2>blogs</h2>
       <Notification />
       <p> {authUser.name} logged in </p>
+      <UsersView />
       <button type="submit" onClick={handleLogout}>
         logout
       </button>
