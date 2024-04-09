@@ -1,9 +1,13 @@
 import { useDispatch } from "react-redux";
 import { createBlogs } from "../reducers/blogReducer";
 import { setNotification } from "../reducers/notificationReducer";
+import Togglable from "./Togglable";
+import { useRef } from "react";
 
 const AddBlogForm = () => {
   const dispatch = useDispatch();
+
+  const blogFormRef = useRef();
 
   const addBlog = async (event) => {
     event.preventDefault();
@@ -27,7 +31,7 @@ const AddBlogForm = () => {
   };
 
   return (
-    <div>
+    <Togglable buttonLabel="create new blog" ref={blogFormRef}>
       <h2>create new</h2>
       <form onSubmit={addBlog}>
         <div>
@@ -46,7 +50,7 @@ const AddBlogForm = () => {
           create
         </button>
       </form>
-    </div>
+    </Togglable>
   );
 };
 export default AddBlogForm;

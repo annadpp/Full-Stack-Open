@@ -1,64 +1,39 @@
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addLikes } from "../reducers/blogReducer";
-import { deleteBlogs } from "../reducers/blogReducer";
 import { setNotification } from "../reducers/notificationReducer";
+import { useParams } from "react-router-dom";
 
-const Blog = ({ blog }) => {
+const Blog = () => {
   const dispatch = useDispatch();
 
-  const authUser = useSelector((state) => state.authUser);
+  const blogs = useSelector((state) => state.blogs);
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: "solid",
-    borderWidth: 1,
-    marginBottom: 5,
-  };
-  const [visible, setVisible] = useState(false);
-  const hideWhenVisible = { display: visible ? "none" : "" };
-  const showWhenVisible = { display: visible ? "" : "none" };
-  const toggleVisibility = () => {
-    setVisible(!visible);
-  };
+  const id = useParams().id;
+  console.log("id", id);
+  const blog = blogs.find((n) => n.id === String(id));
 
-  const handleLike = () => {
+  if (!blog) {
+    return null;
+  }
+
+  const handleNotification = () => {
     dispatch(addLikes(blog));
     dispatch(setNotification(`You added one like for "${blog.title}" !`, 5));
   };
 
-  const handleDelete = () => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      dispatch(deleteBlogs(blog.id));
-      dispatch(setNotification(`You deleted "${blog.title}" !`, 5));
-    }
-  };
-
-  const showDelete = blog.user.username === authUser.username ? true : false;
-
   return (
-    <div style={blogStyle} className="blog">
-      <div style={hideWhenVisible} className="whenHidden">
+    <div>
+      <h2>
         {blog.title} {blog.author}
-        <button onClick={toggleVisibility}>view</button>
-      </div>
-      <div style={showWhenVisible} className="whenShown">
-        {blog.title} {blog.author}
-        <button onClick={toggleVisibility}>hide</button>
-        <p>{blog.url}</p>
-        <p>
-          {blog.likes}
-          <button onClick={handleLike}>likes</button>
-        </p>
-        <p>{blog.user !== null && blog.user.name}</p>
-        {showDelete && (
-          <button onClick={handleDelete} id="remove-button">
-            remove
-          </button>
-        )}
-      </div>
+      </h2>
+      <p>{blog.url}</p>
+      <p>
+        {blog.likes}
+        <button onClick={handleNotification}>likes</button>
+      </p>
+      <p>added by {blog.user !== null && blog.user.name}</p>
     </div>
   );
 };
+
 export default Blog;
