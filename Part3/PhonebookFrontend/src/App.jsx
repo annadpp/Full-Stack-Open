@@ -139,16 +139,26 @@ const App = () => {
           });
       }
     } else {
-      const newPerson = { name: newName, number: newPhone };
-      personsService.create(newPerson).then((returnedPerson) => {
-        setPersons((previousPersons) => previousPersons.concat(returnedPerson));
-        setNewName("");
-        setNewPhone("");
-        setSuccessMessage(`Added ${newName}`);
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 5000);
-      });
+      const newPerson = { name: newName, phone: newPhone };
+      personsService
+        .create(newPerson)
+        .then((returnedPerson) => {
+          setPersons((previousPersons) =>
+            previousPersons.concat(returnedPerson)
+          );
+          setNewName("");
+          setNewPhone("");
+          setSuccessMessage(`Added ${newName}`);
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 5000);
+        })
+        .catch((error) => {
+          setErrorMessage(error.response.data.error);
+        });
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
     }
   };
 

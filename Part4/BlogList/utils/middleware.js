@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { JWT_SECRET } = require("../utils/config");
+const { SECRET } = require("../utils/config");
 
 const logger = require("./logger");
 const User = require("../models/user");
@@ -8,14 +8,16 @@ const User = require("../models/user");
 const tokenExtractor = (request, _response, next) => {
   const authorization = request.get("authorization");
 
-  if (authorization && authorization.toLowerCase().startsWith("bearer "))
+  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
     request.authToken = authorization.substring(7);
+    console.log("Extracted token:", request.authToken); // Add this line for debugging
+  }
 
   next();
 };
 
 const userExtractor = async (request, response, next) => {
-  const authPayload = jwt.verify(request.authToken, JWT_SECRET);
+  const authPayload = jwt.verify(request.authToken, SECRET);
   const user = await User.findById(authPayload.id);
 
   if (user === null)

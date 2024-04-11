@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { JWT_SECRET } = require("../utils/config");
+const { SECRET } = require("../utils/config");
 
 const signToken = (user) =>
   jwt.sign(
@@ -8,7 +8,7 @@ const signToken = (user) =>
       username: user.username,
       id: user._id,
     },
-    JWT_SECRET,
+    SECRET,
     { expiresIn: 60 * 60 }
   );
 
