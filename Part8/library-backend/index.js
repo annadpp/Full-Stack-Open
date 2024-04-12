@@ -1,4 +1,4 @@
-const { ApolloServer } = require("@apollo/server");
+const { ApolloServer, gql, GraphQLError } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
 
 const dotenv = require("dotenv");
@@ -7,9 +7,16 @@ const Author = require("./models/author");
 const Book = require("./models/book");
 
 dotenv.config();
-mongoose.connect(process.env.MONGODB_URI);
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log("connected to MongoDB");
+  })
+  .catch((error) => {
+    console.log("error connection to MongoDB:", error.message);
+  });
 
-const typeDefs = `
+const typeDefs = gql`
   type Author {
     name: String!
     id: ID!
@@ -36,10 +43,7 @@ const typeDefs = `
       published: Int!
       genres: [String!]!
     ): Book
-    editAuthor(
-        name: String!
-        setBornTo: Int!
-    ): Author
+    editAuthor(name: String!, setBornTo: Int!): Author
   }
 `;
 
@@ -70,11 +74,23 @@ const resolvers = {
 
       if (!author) {
         author = new Author({ name });
-        await author.save();
+        try {
+          await author.save();
+        } catch (error) {
+          throw new GraphQLError(
+            "Author name is too short, must be at least 3 characters long."
+          );
+        }
       }
 
       const book = new Book({ author, genres, published, title });
-      await book.save();
+      try {
+        await book.save();
+      } catch (error) {
+        throw new GraphQLError(
+          "Book title is too short, must be at least 3 characters long."
+        );
+      }
       return book;
     },
     editAuthor: async (root, { name, setBornTo }) =>
