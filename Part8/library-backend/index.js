@@ -77,18 +77,8 @@ const resolvers = {
       await book.save();
       return book;
     },
-    editAuthor: (root, { name, setBornTo }) => {
-      const author = authors.find((author) => author.name === name);
-      if (!author) {
-        return null;
-      } else {
-        const updatedAuthor = { ...author, born: setBornTo };
-        authors = authors.map((author) =>
-          author.name === name ? updatedAuthor : author
-        );
-        return updatedAuthor;
-      }
-    },
+    editAuthor: async (root, { name, setBornTo }) =>
+      Author.findOneAndUpdate({ name }, { born: setBornTo }, { new: true }),
   },
 };
 
