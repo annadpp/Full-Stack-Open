@@ -1,7 +1,9 @@
 import { useQuery } from "@apollo/client";
 import { useState } from "react";
 import { GET_ALL_BOOKS } from "../graphql/queries";
+
 import BooksGenreButtons from "./BooksGenreButtons";
+import BooksTable from "./BooksTable";
 
 const Books = (props) => {
   const [genre, setGenre] = useState("");
@@ -24,23 +26,8 @@ const Books = (props) => {
           in genre <b>{genre}</b>
         </p>
       )}
-      <table>
-        <tbody>
-          <tr>
-            <th></th>
-            <th>author</th>
-            <th>published</th>
-          </tr>
-          {books.map((a) => (
-            <tr key={a.title}>
-              <td>{a.title}</td>
-              <td>{a.author.name}</td>
-              <td>{a.published}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {loading && <p>loading books...</p>}
+      <BooksTable books={books} loading={loading} />
+
       <BooksGenreButtons genre={genre} setGenre={setGenre} />
     </div>
   );

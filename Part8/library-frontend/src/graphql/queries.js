@@ -24,3 +24,12 @@ export const GET_ALL_BOOKS = gql`
     }
   }
 `;
+
+export const GET_ME = gql`
+  query GetMe {
+    me {
+      id
+      favouriteGenre
+    }
+  }
+`;
