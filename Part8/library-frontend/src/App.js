@@ -1,37 +1,50 @@
 import { useState } from "react";
+import { useApolloClient } from "@apollo/client";
+
 import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
+import LoginForm from "./components/LoginForm";
 
-import { ALL_AUTHORS, ALL_BOOKS } from "./graphql/queries";
-
-import { useQuery } from "@apollo/client";
+const AUTH_TOKEN_LOCAL_STORAGE_KEY = "library-auth-token";
 
 const App = () => {
   const [page, setPage] = useState("authors");
-  const authors = useQuery(ALL_AUTHORS);
-  const books = useQuery(ALL_BOOKS);
+  const [authToken, setAuthToken] = useState(
+    localStorage.getItem(AUTH_TOKEN_LOCAL_STORAGE_KEY)
+  );
 
-  if (authors.loading || books.loading) {
-    return <div>loading...</div>;
-  }
+  const client = useApolloClient();
 
-  console.log("authors", authors.data.allAuthors);
-  console.log("books", books.data.allBooks);
+  const handleLogin = (authToken) => {
+    localStorage.setItem(AUTH_TOKEN_LOCAL_STORAGE_KEY, authToken);
+    setAuthToken(authToken);
+    setPage("authors");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(AUTH_TOKEN_LOCAL_STORAGE_KEY);
+    setAuthToken(null);
+    client.resetStore();
+  };
 
   return (
     <div>
       <div>
         <button onClick={() => setPage("authors")}>authors</button>
         <button onClick={() => setPage("books")}>books</button>
-        <button onClick={() => setPage("add")}>add book</button>
+        {authToken && <button onClick={() => setPage("add")}>add book</button>}
+        {!authToken && <button onClick={() => setPage("login")}>login</button>}
+        {authToken && <button onClick={() => handleLogout()}>logout</button>}
       </div>
 
-      <Authors show={page === "authors"} authors={authors.data.allAuthors} />
+      <Authors show={page === "authors"} authToken={authToken} />
 
       <Books show={page === "books"} books={books.data.allBooks} />
 
       <NewBook show={page === "add"} />
+
+      {page === "login" && <LoginForm onLogin={handleLogin} />}
     </div>
   );
 };
